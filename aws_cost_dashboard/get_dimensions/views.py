@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from datetime import datetime
 from calendar import monthrange
 from dateutil.relativedelta import relativedelta
+import json
 import boto3
 
 # global var declaration
@@ -71,13 +72,19 @@ def get_tags(request):
     one_year_ago_str = one_year_ago.strftime('%Y-%m-%d')
     today = datetime.today().date()
     today_str = today.strftime('%Y-%m-%d')
+
+    data = {}
     response = client.get_tags(
         TimePeriod={
             'Start': one_year_ago_str,
             'End': today_str
         }
     )
-    return Response(response)
+
+    tagArray = json.loads(response)
+    if 'Tags' in tagArray:
+        data = '{"name" : "akila"}'
+    return Response(json.loads(data))
 
 #this method will return cost forecast of the current month
 @api_view(['GET'])

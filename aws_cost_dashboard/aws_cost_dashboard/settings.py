@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'aws_cost_dashboard.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'bezkoder_db',
+        'NAME': 'aws_cost',
         'HOST': '127.0.0.1',
         'PORT': 27017,
     }
