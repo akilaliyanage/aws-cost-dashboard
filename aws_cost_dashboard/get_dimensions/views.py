@@ -6,7 +6,13 @@ from datetime import datetime
 from calendar import monthrange
 from dateutil.relativedelta import relativedelta
 import json
+from rest_framework.parsers import JSONParser
+from rest_framework import status
 import boto3
+import requests
+
+# serialzers
+from .serializers import TagsSerializer
 
 # global var declaration
 client = boto3.client('ce')
@@ -14,6 +20,8 @@ client = boto3.client('ce')
 # Create your views here.
 
 # this function will return cost for specifies tag within the current month upto today
+
+
 @api_view(['GET'])
 def get_cost_and_usage_for_past_six_months(request):
     response = client.get_cost_and_usage(
@@ -52,7 +60,9 @@ def get_cost_and_usage_for_current_month(request):
     )
     return Response(response)
 
-#this method will return all the service dimentions within specified time period
+# this method will return all the service dimentions within specified time period
+
+
 @api_view(['GET'])
 def get_dimensions(request):
     response = client.get_dimension_values(
@@ -65,28 +75,36 @@ def get_dimensions(request):
     return Response(response)
 
 
-#this method will return all the tags use for cost calculation within specified time perod
+# this method will return all the tags use for cost calculation within specified time perod
 @api_view(['GET'])
 def get_tags(request):
     one_year_ago = datetime.now() - relativedelta(years=1)
     one_year_ago_str = one_year_ago.strftime('%Y-%m-%d')
     today = datetime.today().date()
     today_str = today.strftime('%Y-%m-%d')
+    url = 'http://127.0.0.1:8000/get-dim/db/'
 
-    data = {}
     response = client.get_tags(
         TimePeriod={
             'Start': one_year_ago_str,
             'End': today_str
-        }
+        },
+        TagKey='role',
     )
+    res_json = json.loads(response)
+    data = []
+    for Tags in res_json['Tags']:
+        item = {'Key': 'role', 'value': Tags}
+        data.append(item)
 
-    tagArray = json.loads(response)
-    if 'Tags' in tagArray:
-        data = '{"name" : "akila"}'
-    return Response(json.loads(data))
+    for key_item in data:
+        return response('akila')
+        requests.post(url, json.dumps(key_item))
+    return Response(response)
 
-#this method will return cost forecast of the current month
+# this method will return cost forecast of the current month
+
+
 @api_view(['GET'])
 def get_forecats_cost(request):
     today = datetime.today().date()
@@ -99,6 +117,18 @@ def get_forecats_cost(request):
             'End': last_date_str
         },
         Metric='BLENDED_COST',
-        Granularity= 'MONTHLY',
+        Granularity='MONTHLY',
     )
     return Response(response)
+
+
+@api_view(['POST'])
+# test db create method
+def save_to_db(request):
+    data = JSONParser().parse(request)
+    tag_serializer = TagsSerializer(data=data)
+
+    if tag_serializer.is_valid():
+        tag_serializer.save()
+        return JsonResponse(tag_serializer.data, status=status.HTTP_201_CREATED)
+    return JsonResponse(tag_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

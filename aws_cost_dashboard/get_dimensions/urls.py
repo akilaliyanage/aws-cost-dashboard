@@ -8,4 +8,5 @@ urlpatterns = [
     path('dims/', views.get_dimensions, name='get all demensions'),
     path('tags/', views.get_tags, name='get all demensions'),
     path('pcost/', views.get_forecats_cost, name='get all demensions'),
+    path('db/', views.save_to_db, name='get all demensions'),
 ]
