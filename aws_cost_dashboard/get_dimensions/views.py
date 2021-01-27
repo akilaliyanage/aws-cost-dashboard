@@ -10,6 +10,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework import status
 import boto3
 import requests
+import time
 
 # serialzers
 from .serializers import TagsSerializer
@@ -63,9 +64,8 @@ def get_cost_and_usage_for_current_month(request):
     )
     return Response(response)
 
-# this method will return all the service dimentions within specified time period
 
-
+# this method will return all the service dimentions within specified time perio
 @api_view(['GET'])
 def get_dimensions(request):
     response = client.get_dimension_values(
@@ -134,3 +134,9 @@ def save_to_db(request):
         tag_serializer.save()
         return JsonResponse(tag_serializer.data, status=status.HTTP_201_CREATED)
     return JsonResponse(tag_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def db_get_all_tags(request):
+    tags = Tags.objects.all()
+    tag_serializer = TagsSerializer(tags, many=True)
+    return Response(tag_serializer.data)

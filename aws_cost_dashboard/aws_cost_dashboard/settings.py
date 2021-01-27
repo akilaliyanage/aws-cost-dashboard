@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'get_dimensions',
-    'db_ops'
+    'background_task',
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -84,6 +85,11 @@ DATABASES = {
         'PORT': 27017,
     }
 }
+
+#crontab
+CRONJOBS = [
+    ('*/5 * * * *', 'get_dimensions.cron.my_scheduled_job')
+]
 
 
 # Password validation
