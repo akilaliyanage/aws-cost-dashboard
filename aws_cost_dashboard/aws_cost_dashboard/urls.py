@@ -18,5 +18,6 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('get-dim/',include('get_dimensions.urls'))
+    path('get-dim/', include('get_dimensions.urls')),
+    path('db/', include('db_ops.urls'))
 ]

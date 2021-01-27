@@ -14,6 +14,9 @@ import requests
 # serialzers
 from .serializers import TagsSerializer
 
+#models
+from .models import Tags
+
 # global var declaration
 client = boto3.client('ce')
 
@@ -89,18 +92,17 @@ def get_tags(request):
             'Start': one_year_ago_str,
             'End': today_str
         },
-        TagKey='role',
+        TagKey='Name',  #chnage this to take values for the defind key
     )
-    res_json = json.loads(response)
-    data = []
-    for Tags in res_json['Tags']:
-        item = {'Key': 'role', 'value': Tags}
-        data.append(item)
+    res_json = json.dumps(response)
+    data = {}
+    jsonObject = json.loads(res_json)
+    for Tags in jsonObject['Tags']:
+        data["key"] = "role"
+        data["value"] = str(Tags)
+        requests.post(url, json.dumps(data))
 
-    for key_item in data:
-        return response('akila')
-        requests.post(url, json.dumps(key_item))
-    return Response(response)
+    return Response(json.dumps(data))
 
 # this method will return cost forecast of the current month
 
