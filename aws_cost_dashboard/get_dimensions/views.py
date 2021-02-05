@@ -11,6 +11,7 @@ from rest_framework import status
 import boto3
 import requests
 import time
+from django.db import connection
 
 # serialzers
 from .serializers import TagsSerializer
@@ -19,7 +20,9 @@ from .serializers import TagsSerializer
 from .models import Tags
 
 # global var declaration
-client = boto3.client('ce')
+client = boto3.client('ce',
+    aws_access_key_id='AKIAZ67XFEUH74LDRDTX',
+    aws_secret_access_key='QVf9h7flXvPtUf5VJlK63H0A6PLVp2fqIEIYs7Hv')
 
 # Create your views here.
 
@@ -35,9 +38,7 @@ def get_cost_and_usage_for_past_six_months(request):
         },
         Granularity='MONTHLY',
         Metrics=[
-            'BlendedCost',
-            "UnblendedCost",
-            "UsageQuantity"
+            'BlendedCost'
         ],
     )
     return Response(response)
@@ -57,9 +58,7 @@ def get_cost_and_usage_for_current_month(request):
         },
         Granularity='MONTHLY',
         Metrics=[
-            'BlendedCost',
-            "UnblendedCost",
-            "UsageQuantity"
+            'BlendedCost'
         ],
     )
     return Response(response)
@@ -86,6 +85,10 @@ def get_tags(request):
     today = datetime.today().date()
     today_str = today.strftime('%Y-%m-%d')
     url = 'http://127.0.0.1:8000/get-dim/db/'
+
+
+    cursor = connection.cursor()
+    cursor.execute("truncate table aws.get_dimensions_tags;")
 
     response = client.get_tags(
         TimePeriod={
