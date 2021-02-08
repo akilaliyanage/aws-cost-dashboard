@@ -12,6 +12,7 @@ import boto3
 import requests
 import time
 from django.db import connection
+from random import randrange
 
 # serialzers
 from .serializers import TagsSerializer
@@ -84,8 +85,6 @@ def get_tags(request):
     one_year_ago_str = one_year_ago.strftime('%Y-%m-%d')
     today = datetime.today().date()
     today_str = today.strftime('%Y-%m-%d')
-    url = 'http://127.0.0.1:8000/get-dim/db/'
-
 
     cursor = connection.cursor()
     cursor.execute("truncate table aws.get_dimensions_tags;")
@@ -101,11 +100,12 @@ def get_tags(request):
     data = {}
     jsonObject = json.loads(res_json)
     for Tags in jsonObject['Tags']:
-        data["key"] = "role"
-        data["value"] = str(Tags)
-        requests.post(url, json.dumps(data))
+        if(Tags == ''):
+            continue
+        else:
+            cursor.execute("insert into aws.get_dimensions_tags values('{0}', '{1}', '{2}');".format(int(randrange(1, 9999999999)),'role',str(Tags)))
 
-    return Response(json.dumps(data))
+    return JsonResponse(status=status.HTTP_201_CREATED)
 
 # this method will return cost forecast of the current month
 
